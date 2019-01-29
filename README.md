@@ -1,13 +1,13 @@
 
 # microservice-demos
 
-Requarments
+# Requarments
 - Java 8
 - Docker
 - maven 
 
 to Run all service (kafka, redis, mysql, collector, updater and reportor)
- cmd-> ./run- apps.sh  or docker-compose up 
+- cmd-> ./run- apps.sh  or docker-compose up 
 
 - controller service swagger url : http://localhost:8081/swagger-ui.html#/
 
