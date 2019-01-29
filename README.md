@@ -1,3 +1,4 @@
+
 # microservice-demos
 
 Requarments
@@ -13,3 +14,4 @@ to Run all service (kafka, redis, mysql, collector, updater and reportor)
 - Reposter service swagger url : http://localhost:8082/swagger-ui.html#/
 
 - security part : user-> 'admin' and pwd-> 'admin12345' 
+
