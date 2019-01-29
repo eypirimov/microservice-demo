@@ -1,0 +1,81 @@
+version: "3.5"
+services:
+  collector:
+    build:
+      context: .
+      dockerfile: "collector.Dockerfile"
+    ports:
+    - "8081:8081"
+    depends_on:
+      - base
+    environment:
+      - KAFKA_SERVER=kafka:9092
+  reporter:
+    build:
+      context: .
+      dockerfile: "reporter.Dockerfile"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - base
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+  updater:
+    build:
+      context: .
+      dockerfile: "updater.Dockerfile"
+    depends_on:
+      - base
+      - mysql_updater
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql_updater:3306/event-db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin123
+      - KAFKA_SERVER=kafka:9092
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+  base:
+    build:
+      context: .
+      dockerfile: "base.Dockerfile"
+    depends_on:
+      - redis
+      - kafka
+    volumes:
+      - maven-repo:/root/.m2
+  mysql_updater:
+    image: "mysql:5.7.24"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=event-db
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=admin123
+    volumes:
+      - ./updater/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    restart: always
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+  kafka:
+    image: wurstmeister/kafka:2.12-2.1.0
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_CREATE_TOPICS: "input-events:1:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+volumes:
+  maven-repo:
+
